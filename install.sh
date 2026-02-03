@@ -36,10 +36,18 @@ sudo npm install -g pm2
 echo "Setting up Database..."
 read -s -p "Enter password for database user 'mainsite_user': " DB_PASSWORD
 echo ""
+
+# Switch to /tmp to avoid permission denied errors with sudo -u postgres
+CURRENT_DIR=$(pwd)
+cd /tmp
+
 sudo -u postgres psql -c "CREATE DATABASE mainsite_db;" || echo "Database already exists"
 sudo -u postgres psql -c "CREATE USER mainsite_user WITH ENCRYPTED PASSWORD '$DB_PASSWORD';" || \
 sudo -u postgres psql -c "ALTER USER mainsite_user WITH ENCRYPTED PASSWORD '$DB_PASSWORD';"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE mainsite_db TO mainsite_user;"
+
+# Return to project directory
+cd "$CURRENT_DIR"
 
 # Create .env file for server
 echo "Creating .env file..."
@@ -112,7 +120,7 @@ sudo certbot --nginx -d $DOMAIN_NAME -d www.$DOMAIN_NAME --non-interactive --agr
 # Start Backend
 echo "Starting Backend..."
 cd server
-pm2 start index.js --name "mainsite-server"
+pm2 describe mainsite-server > /dev/null 2>&1 && pm2 restart mainsite-server || pm2 start index.js --name "mainsite-server"
 pm2 save
 pm2 startup
 
