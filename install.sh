@@ -71,16 +71,16 @@ npm install --prefix client
 echo "Building frontend..."
 npm run build --prefix client
 
+# Nginx Config
+echo "Configuring Nginx..."
+read -p "Enter your domain name (e.g. example.com): " DOMAIN_NAME
+
 # Deploy frontend
 echo "Deploying frontend..."
 sudo mkdir -p /var/www/$DOMAIN_NAME
 sudo cp -r client/dist/* /var/www/$DOMAIN_NAME/
 sudo chown -R www-data:www-data /var/www/$DOMAIN_NAME
 sudo chmod -R 755 /var/www/$DOMAIN_NAME
-
-# Nginx Config
-echo "Configuring Nginx..."
-read -p "Enter your domain name (e.g. example.com): " DOMAIN_NAME
 
 # Remove default config if exists
 sudo rm -f /etc/nginx/sites-enabled/default
