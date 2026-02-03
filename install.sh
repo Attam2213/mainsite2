@@ -6,6 +6,7 @@ set -e
 # Update system
 echo "Updating system..."
 sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get install -y git
 
 # Install Node.js
 echo "Installing Node.js..."
