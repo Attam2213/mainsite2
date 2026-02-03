@@ -48,6 +48,13 @@ npm install --prefix client
 echo "Building frontend..."
 npm run build --prefix client
 
+# Deploy frontend
+echo "Deploying frontend..."
+sudo mkdir -p /var/www/$DOMAIN_NAME
+sudo cp -r client/dist/* /var/www/$DOMAIN_NAME/
+sudo chown -R www-data:www-data /var/www/$DOMAIN_NAME
+sudo chmod -R 755 /var/www/$DOMAIN_NAME
+
 # Nginx Config
 echo "Configuring Nginx..."
 read -p "Enter your domain name (e.g. example.com): " DOMAIN_NAME
@@ -56,16 +63,13 @@ read -p "Enter your domain name (e.g. example.com): " DOMAIN_NAME
 sudo rm -f /etc/nginx/sites-enabled/default
 
 # Create config
-# Note: Using $(pwd) assumes script is run from project root
-PROJECT_ROOT=$(pwd)
-
-sudo bash -c "cat > /etc/nginx/sites-available/$DOMAIN_NAME <<EOF
+cat > nginx.conf.temp <<EOF
 server {
     listen 80;
     server_name $DOMAIN_NAME www.$DOMAIN_NAME;
 
     location / {
-        root $PROJECT_ROOT/client/dist;
+        root /var/www/$DOMAIN_NAME;
         index index.html index.htm;
         try_files \$uri \$uri/ /index.html;
     }
@@ -79,8 +83,9 @@ server {
         proxy_cache_bypass \$http_upgrade;
     }
 }
-EOF"
+EOF
 
+sudo mv nginx.conf.temp /etc/nginx/sites-available/$DOMAIN_NAME
 sudo ln -sf /etc/nginx/sites-available/$DOMAIN_NAME /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
