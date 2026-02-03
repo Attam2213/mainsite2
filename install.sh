@@ -3,6 +3,9 @@
 # Exit on error
 set -e
 
+# Ensure we are in the project directory
+cd "$(dirname "$0")"
+
 # Update system
 echo "Updating system..."
 sudo apt-get update && sudo apt-get upgrade -y
