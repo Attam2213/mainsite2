@@ -3,6 +3,9 @@
 # Exit on error
 set -e
 
+# Ensure we are in the project directory
+cd "$(dirname "$0")"
+
 echo "Starting update process..."
 
 # Force git update
