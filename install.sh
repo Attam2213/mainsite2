@@ -34,9 +34,24 @@ sudo npm install -g pm2
 
 # Database Setup
 echo "Setting up Database..."
+read -s -p "Enter password for database user 'mainsite_user': " DB_PASSWORD
+echo ""
 sudo -u postgres psql -c "CREATE DATABASE mainsite_db;" || echo "Database already exists"
-sudo -u postgres psql -c "CREATE USER mainsite_user WITH ENCRYPTED PASSWORD 'root';" || echo "User already exists"
+sudo -u postgres psql -c "CREATE USER mainsite_user WITH ENCRYPTED PASSWORD '$DB_PASSWORD';" || \
+sudo -u postgres psql -c "ALTER USER mainsite_user WITH ENCRYPTED PASSWORD '$DB_PASSWORD';"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE mainsite_db TO mainsite_user;"
+
+# Create .env file for server
+echo "Creating .env file..."
+cat > server/.env <<EOF
+PORT=5000
+DB_NAME=mainsite_db
+DB_USER=mainsite_user
+DB_PASSWORD=$DB_PASSWORD
+DB_HOST=localhost
+DB_PORT=5432
+SECRET_KEY=$(openssl rand -base64 32)
+EOF
 
 # Project Setup
 echo "Setting up project..."
