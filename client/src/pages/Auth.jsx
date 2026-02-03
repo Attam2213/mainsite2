@@ -13,9 +13,17 @@ const Auth = observer(() => {
     const isLogin = location.pathname === LOGIN_ROUTE
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
 
     const click = async () => {
         try {
+            if (!isLogin) {
+                if (password !== confirmPassword) {
+                    alert("Пароли не совпадают!");
+                    return;
+                }
+            }
+
             let data;
             if (isLogin) {
                 data = await login(email, password);
@@ -67,6 +75,20 @@ const Auth = observer(() => {
                             color: 'white'
                         }}
                     />
+                    {!isLogin && (
+                        <Form.Control
+                            className="mt-3"
+                            placeholder="Повторите пароль..."
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            type="password"
+                            style={{
+                                background: 'rgba(255,255,255,0.05)', 
+                                border: '1px solid rgba(255,255,255,0.1)', 
+                                color: 'white'
+                            }}
+                        />
+                    )}
                     <Row className="d-flex justify-content-between mt-3 pl-3 pr-3 align-items-center">
                         {isLogin ?
                             <div style={{color: 'var(--text-secondary)'}}>
