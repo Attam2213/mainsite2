@@ -16,7 +16,7 @@ const App = observer(() => {
             user.setUser(data)
             user.setIsAuth(true)
         }).catch(() => {
-            // Error handling if check fails (user not logged in)
+            user.setUser({})
             user.setIsAuth(false)
         }).finally(() => setLoading(false))
     }, [])

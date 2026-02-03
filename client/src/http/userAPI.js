@@ -15,8 +15,11 @@ export const login = async (email, password) => {
 
 export const check = async () => {
     const {data} = await $authHost.get('user/auth')
-    localStorage.setItem('token', data.token)
-    return jwtDecode(data.token)
+    if (data.token) {
+        localStorage.setItem('token', data.token)
+        return jwtDecode(data.token)
+    }
+    return null;
 }
 
 export const getProfile = async () => {
