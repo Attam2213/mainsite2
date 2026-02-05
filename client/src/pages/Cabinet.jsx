@@ -1,73 +1,194 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {Container, Card, Button} from "react-bootstrap";
-import {Context} from "../main";
-import {getProfile} from "../http/userAPI";
-import { FaUser, FaServer, FaGlobe, FaCreditCard } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { Container, Card, Button, Alert, Row, Col, Modal, Form } from 'react-bootstrap';
+import { observer } from 'mobx-react-lite';
+import { useNavigate } from 'react-router-dom';
+import { LOGIN_ROUTE } from '../utils/consts';
+import { getProfile, createYooMoneyPayment } from '../http/userAPI';
+import { useContext } from 'react';
+import { Context } from '../main';
+import ChatSupport from '../components/ChatSupport';
 
-const Cabinet = () => {
-    const {user} = useContext(Context);
-    const [profile, setProfile] = useState({});
+const Cabinet = observer(() => {
+    const { user } = useContext(Context);
+    const navigate = useNavigate();
+    
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [profile, setProfile] = useState(null);
+    const [showTopUpModal, setShowTopUpModal] = useState(false);
+    const [topUpAmount, setTopUpAmount] = useState('');
+    const [topUpLoading, setTopUpLoading] = useState(false);
 
     useEffect(() => {
-        getProfile()
-            .then(data => setProfile(data))
-            .catch(error => {
-                console.error('Ошибка загрузки профиля:', error);
-                alert('Не удалось загрузить данные профиля');
-            });
-    }, [])
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        try {
+            setLoading(true);
+            setError('');
+            const data = await getProfile();
+            setProfile(data);
+        } catch (err) {
+            setError(err.message || 'Не удалось загрузить профиль');
+            if (err.message === 'Не авторизован') {
+                setTimeout(() => navigate(LOGIN_ROUTE), 2000);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = () => {
+        user.logout();
+        navigate(LOGIN_ROUTE);
+    };
+
+    const handleTopUpBalance = async () => {
+        if (!topUpAmount || parseFloat(topUpAmount) <= 0) {
+            setError('Введите корректную сумму');
+            return;
+        }
+
+        try {
+            setTopUpLoading(true);
+            setError('');
+            
+            // Создаем платеж через YooMoney
+            const response = await createYooMoneyPayment(parseFloat(topUpAmount));
+            
+            if (response.payment && response.payment.confirmation && response.payment.confirmation.confirmation_url) {
+                // Перенаправляем пользователя на страницу оплаты YooMoney
+                window.location.href = response.payment.confirmation.confirmation_url;
+            } else {
+                // Если нет URL для оплаты, показываем ошибку
+                setError('Не удалось создать платеж. Попробуйте позже.');
+            }
+            
+            setShowTopUpModal(false);
+            setTopUpAmount('');
+        } catch (err) {
+            setError(err.message || 'Не удалось создать платеж');
+        } finally {
+            setTopUpLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <Container className="mt-5 pt-5">
+                <div className="d-flex justify-content-center align-items-center" style={{height: '200px'}}>
+                    <div>Загрузка профиля...</div>
+                </div>
+            </Container>
+        );
+    }
+
+    if (error && !profile) {
+        return (
+            <Container className="mt-5 pt-5">
+                <Alert variant="danger" className="text-center">
+                    {error}
+                </Alert>
+            </Container>
+        );
+    }
 
     return (
         <Container className="mt-5 pt-5">
-            <h1 className="mb-4 text-gradient">Личный кабинет</h1>
-            <Card className="p-4 mt-3 shadow-sm" style={{
-                background: 'var(--card-bg)',
-                color: 'var(--text-primary)',
-                border: '1px solid rgba(255,255,255,0.1)'
-            }}>
-                <div className="d-flex align-items-center gap-3 mb-4">
-                    <FaUser size={30} color="var(--primary-color)" />
-                    <h3 className="m-0">Информация о пользователе</h3>
-                </div>
-                <div style={{fontSize: '1.1rem'}}>
-                    <div className="mb-2"><span style={{color: 'var(--text-secondary)'}}>Email:</span> {profile.email}</div>
-                    
-                    <div className="mt-4 p-3 rounded" style={{background: 'rgba(255,255,255,0.03)'}}>
-                        {profile.domain ? (
-                            <div className="d-flex align-items-center gap-2 mb-2">
-                                <FaGlobe color="var(--accent-color)" /> 
-                                <span>Ваш домен: <strong>{profile.domain}</strong></span>
-                            </div>
-                        ) : (
-                            <div className="text-warning d-flex align-items-center gap-2">
-                                <FaGlobe /> Домен еще не назначен администратором
-                            </div>
-                        )}
-                        
-                        {profile.server_ip && (
-                            <div className="d-flex align-items-center gap-2">
-                                <FaServer color="#ec4899" />
-                                <span>Ваш сервер: <strong>{profile.server_ip}</strong></span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </Card>
-            
-            <Card className="p-4 mt-4 shadow-sm" style={{
-                background: 'var(--card-bg)',
-                color: 'var(--text-primary)',
-                border: '1px solid rgba(255,255,255,0.1)'
-            }}>
-                <div className="d-flex align-items-center gap-3 mb-3">
-                    <FaCreditCard size={30} color="var(--primary-color)" />
-                    <h3 className="m-0">Оплата услуг</h3>
-                </div>
-                <p style={{color: 'var(--text-secondary)'}}>Управляйте своими подписками и оплачивайте хостинг.</p>
-                <Button className="btn-primary-custom" style={{width: 'fit-content'}}>Оплатить хостинг</Button>
-            </Card>
+            <Row className="justify-content-center">
+                <Col md={8}>
+                    <Card className="p-4">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h2>Личный кабинет</h2>
+                            <Button variant="outline-danger" onClick={handleLogout}>
+                                Выйти
+                            </Button>
+                        </div>
+
+                        {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
+                        {success && <Alert variant="success" dismissible onClose={() => setSuccess('')}>{success}</Alert>}
+
+                        <Row>
+                            <Col md={6}>
+                                <h5 className="mb-3">Информация о профиле</h5>
+                                <div className="mb-2">
+                                    <strong>Email:</strong> {profile?.email || 'Не указан'}
+                                </div>
+                                <div className="mb-2">
+                                    <strong>Роль:</strong> {profile?.role || 'USER'}
+                                </div>
+                                <div className="mb-2">
+                                    <strong>Баланс:</strong> <span className="text-success fw-bold">{profile?.balance || '0.00'} руб.</span>
+                                </div>
+                                <Button 
+                                    variant="success" 
+                                    onClick={() => setShowTopUpModal(true)}
+                                    className="mb-3"
+                                >
+                                    Пополнить баланс
+                                </Button>
+                            </Col>
+                            
+                            <Col md={6}>
+                                <h5 className="mb-3">Настройки сервера</h5>
+                                <div className="mb-3">
+                                    <strong>Домен:</strong> {profile?.domain || 'Не указан'}
+                                </div>
+                                <div className="mb-3">
+                                    <strong>IP сервера:</strong> {profile?.server_ip || 'Не указан'}
+                                </div>
+                                <small className="text-muted d-block">
+                                    Для изменения настроек обратитесь к администратору
+                                </small>
+                            </Col>
+                        </Row>
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Чат технической поддержки */}
+            <ChatSupport userId={profile?.id} />
+
+            {/* Модальное окно пополнения баланса */}
+            <Modal show={showTopUpModal} onHide={() => setShowTopUpModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Пополнение баланса</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Сумма пополнения (руб.)</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={topUpAmount}
+                                onChange={(e) => setTopUpAmount(e.target.value)}
+                                placeholder="Введите сумму"
+                                min="1"
+                                step="0.01"
+                            />
+                        </Form.Group>
+                        <small className="text-muted">
+                            В дальнейшем здесь будет интеграция с YooMoney
+                        </small>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowTopUpModal(false)}>
+                        Отмена
+                    </Button>
+                    <Button 
+                        variant="success" 
+                        onClick={handleTopUpBalance}
+                        disabled={topUpLoading}
+                    >
+                        {topUpLoading ? 'Обработка...' : 'Пополнить'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
-};
+});
 
 export default Cabinet;

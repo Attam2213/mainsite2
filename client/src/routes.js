@@ -1,8 +1,9 @@
 import Admin from "./pages/Admin";
-import {ADMIN_ROUTE, CABINET_ROUTE, LOGIN_ROUTE, PORTFOLIO_ROUTE, REGISTRATION_ROUTE, SHOP_ROUTE} from "./utils/consts";
+import {ADMIN_ROUTE, CABINET_ROUTE, LOGIN_ROUTE, PORTFOLIO_ROUTE, REGISTRATION_ROUTE, SHOP_ROUTE, PAYMENT_STATUS_ROUTE} from "./utils/consts";
 import Cabinet from "./pages/Cabinet";
 import Shop from "./pages/Shop";
 import Auth from "./pages/Auth";
+import PaymentStatus from "./pages/PaymentStatus";
 
 export const authRoutes = [
     {
@@ -12,6 +13,10 @@ export const authRoutes = [
     {
         path: CABINET_ROUTE,
         Component: Cabinet
+    },
+    {
+        path: PAYMENT_STATUS_ROUTE,
+        Component: PaymentStatus
     }
 ]
 

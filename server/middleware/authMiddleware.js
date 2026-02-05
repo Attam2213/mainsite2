@@ -1,11 +1,13 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = function (req, res, next) {
+    console.log('Auth middleware - Запрос к:', req.path, 'Метод:', req.method);
     if (req.method === "OPTIONS") {
         next();
     }
     try {
         const authHeader = req.headers.authorization;
+        console.log('Auth middleware - Authorization header:', authHeader);
         if (!authHeader) {
             return res.status(401).json({message: "Не авторизован"});
         }
@@ -21,9 +23,11 @@ module.exports = function (req, res, next) {
         }
         
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        console.log('Auth middleware - Decoded token:', decoded);
         req.user = decoded;
         next();
     } catch (e) {
+        console.log('Auth middleware - Error:', e.message);
         res.status(401).json({message: "Не авторизован"});
     }
 };

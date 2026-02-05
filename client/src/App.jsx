@@ -12,10 +12,13 @@ const App = observer(() => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        console.log('Проверка аутентификации при загрузке приложения...');
         check().then(data => {
+            console.log('Пользователь аутентифицирован:', data);
             user.setUser(data)
             user.setIsAuth(true)
-        }).catch(() => {
+        }).catch((error) => {
+            console.log('Пользователь не аутентифицирован:', error.message);
             user.setUser({})
             user.setIsAuth(false)
         }).finally(() => setLoading(false))

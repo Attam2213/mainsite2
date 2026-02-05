@@ -13,9 +13,7 @@ const NavBar = observer(() => {
     const navigate = useNavigate()
 
     const logOut = () => {
-        user.setUser({})
-        user.setIsAuth(false)
-        localStorage.removeItem('token')
+        user.logout()
         navigate(LOGIN_ROUTE)
     }
 
@@ -40,7 +38,7 @@ const NavBar = observer(() => {
                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="ms-auto" style={{color: 'white', alignItems: 'center', gap: '15px'}}>
-                        {user.isAuth ?
+                        {user.isAuth && user.user && user.user.role ?
                             <>
                                 {user.user.role === 'ADMIN' && 
                                     <Button variant={"outline-light"} onClick={() => navigate(ADMIN_ROUTE)} className="d-flex align-items-center gap-2">
