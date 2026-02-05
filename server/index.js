@@ -10,7 +10,15 @@ const errorHandler = require('./middleware/errorHandler');
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-app.use(cors());
+
+// Более строгая настройка CORS
+const corsOptions = {
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'static')));
 app.use('/api', router);
@@ -21,10 +29,15 @@ app.use(errorHandler);
 const start = async () => {
     try {
         await sequelize.authenticate();
+        console.log('База данных подключена успешно.');
+        
         await sequelize.sync(); // alter: true if needed
-        app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+        console.log('Модели синхронизированы с базой данных.');
+        
+        app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
     } catch (e) {
-        console.log(e);
+        console.error('Ошибка при запуске сервера:', e);
+        process.exit(1);
     }
 }
 

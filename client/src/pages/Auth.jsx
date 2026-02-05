@@ -17,6 +17,28 @@ const Auth = observer(() => {
 
     const click = async () => {
         try {
+            // Клиентская валидация
+            if (!email.trim()) {
+                alert("Введите email!");
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert("Введите корректный email!");
+                return;
+            }
+            
+            if (!password.trim()) {
+                alert("Введите пароль!");
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert("Пароль должен быть не менее 6 символов!");
+                return;
+            }
+            
             if (!isLogin) {
                 if (password !== confirmPassword) {
                     alert("Пароли не совпадают!");
@@ -36,7 +58,6 @@ const Auth = observer(() => {
         } catch (e) {
             alert(e.response?.data?.message || "Ошибка авторизации")
         }
-
     }
 
     return (
