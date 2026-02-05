@@ -9,7 +9,12 @@ const Cabinet = () => {
     const [profile, setProfile] = useState({});
 
     useEffect(() => {
-        getProfile().then(data => setProfile(data));
+        getProfile()
+            .then(data => setProfile(data))
+            .catch(error => {
+                console.error('Ошибка загрузки профиля:', error);
+                alert('Не удалось загрузить данные профиля');
+            });
     }, [])
 
     return (

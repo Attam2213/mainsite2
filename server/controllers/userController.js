@@ -14,9 +14,19 @@ const generateJwt = (id, email, role) => {
 class UserController {
     async registration(req, res, next) {
         const {email, password} = req.body;
+        
+        // Валидация email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email || !password) {
             return next(ApiError.badRequest('Некорректный email или пароль'));
         }
+        if (!emailRegex.test(email)) {
+            return next(ApiError.badRequest('Некорректный формат email'));
+        }
+        if (password.length < 6) {
+            return next(ApiError.badRequest('Пароль должен быть не менее 6 символов'));
+        }
+        
         const candidate = await User.findOne({where: {email}});
         if (candidate) {
             return next(ApiError.badRequest('Пользователь с таким email уже существует'));

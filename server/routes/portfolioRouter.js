@@ -16,7 +16,22 @@ const storage = multer.diskStorage({
     }
 })
 
-const upload = multer({ storage: storage });
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Недопустимый тип файла. Разрешены только изображения.'), false);
+    }
+};
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB
+    }
+});
 
 router.post('/', authMiddleware, upload.single('image'), portfolioController.create);
 router.get('/', portfolioController.getAll);

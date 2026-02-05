@@ -17,27 +17,35 @@ const Admin = () => {
         setFile(e.target.files[0])
     }
 
-    const addPortfolio = () => {
-        const formData = new FormData()
-        formData.append('title', title)
-        formData.append('description', desc)
-        formData.append('link', link)
-        if (file) {
-            formData.append('image', file)
-        }
-        $authHost.post('portfolio', formData).then(data => {
+    const addPortfolio = async () => {
+        try {
+            const formData = new FormData()
+            formData.append('title', title)
+            formData.append('description', desc)
+            formData.append('link', link)
+            if (file) {
+                formData.append('image', file)
+            }
+            await $authHost.post('portfolio', formData)
             alert('Работа добавлена')
             setTitle('')
             setDesc('')
             setLink('')
             setFile(null)
-        })
+        } catch (error) {
+            console.error('Ошибка при добавлении работы:', error)
+            alert('Не удалось добавить работу: ' + (error.response?.data?.message || 'Ошибка сервера'))
+        }
     }
 
-    const assignServer = () => {
-        $authHost.post('user/assign-server', {userId, domain, server_ip: serverIp}).then(data => {
+    const assignServer = async () => {
+        try {
+            await $authHost.post('user/assign-server', {userId, domain, server_ip: serverIp})
             alert('Данные назначены')
-        })
+        } catch (error) {
+            console.error('Ошибка при назначении сервера:', error)
+            alert('Не удалось назначить сервер: ' + (error.response?.data?.message || 'Ошибка сервера'))
+        }
     }
 
     const inputStyle = {
