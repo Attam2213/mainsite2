@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Enhanced VDS Installation Script for Ubuntu
+# Modified to allow root execution (use at your own risk)
 # Exit on error
 set -e
 
@@ -34,10 +35,10 @@ cd "$SCRIPT_DIR"
 
 log "Starting VDS installation for mainsite2..."
 
-# Check if running as root
+# Root execution warning (proceeding anyway)
 if [[ $EUID -eq 0 ]]; then
-   error "This script should not be run as root"
-   exit 1
+   warning "Running as root - proceeding with caution"
+   warning "Make sure you understand the security risks"
 fi
 
 # Get user inputs with validation
