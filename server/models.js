@@ -41,7 +41,8 @@ const Message = sequelize.define('message', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     chat_id: { type: DataTypes.INTEGER, allowNull: false },
     sender_id: { type: DataTypes.INTEGER, allowNull: false },
-    receiver_id: { type: DataTypes.INTEGER, allowNull: false },
+    sender_type: { type: DataTypes.ENUM('user', 'admin'), defaultValue: 'user' },
+    receiver_id: { type: DataTypes.INTEGER, allowNull: true },
     content: { type: DataTypes.TEXT, allowNull: false },
     is_read: { type: DataTypes.BOOLEAN, defaultValue: false },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
@@ -61,7 +62,8 @@ const Chat = sequelize.define('chat', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
     admin_id: { type: DataTypes.INTEGER, allowNull: true },
-    is_active: { type: DataTypes.BOOLEAN, defaultValue: true },
+    subject: { type: DataTypes.STRING, defaultValue: 'Техническая поддержка' },
+    status: { type: DataTypes.ENUM('active', 'closed'), defaultValue: 'active' },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 });

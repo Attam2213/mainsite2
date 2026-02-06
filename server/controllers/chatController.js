@@ -163,8 +163,9 @@ class ChatController {
                         message_id: message.id,
                         filename: filename,
                         original_name: file.originalname,
-                        file_type: file.mimetype,
-                        file_size: file.size
+                        mimetype: file.mimetype,
+                        size: file.size,
+                        path: `chat/${filename}`
                     });
                 }
             }
