@@ -11,3 +11,6 @@ client/node_modules/
 server/node_modules/
 server/static/*
 !server/static/.gitkeep
+*.sqlite
+*.sqlite3
+database.sqlite
