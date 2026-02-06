@@ -18,6 +18,10 @@ const App = observer(() => {
                 console.log('Пользователь аутентифицирован:', data.user);
                 user.setUser(data.user)
                 user.setIsAuth(true)
+                // Сохраняем обновленный токен (важно при смене ролей)
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                }
             } else {
                 console.log('Данные пользователя некорректны:', data);
                 user.setUser({})
