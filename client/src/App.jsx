@@ -14,9 +14,15 @@ const App = observer(() => {
     useEffect(() => {
         console.log('Проверка аутентификации при загрузке приложения...');
         check().then(data => {
-            console.log('Пользователь аутентифицирован:', data);
-            user.setUser(data)
-            user.setIsAuth(true)
+            if (data && data.user) {
+                console.log('Пользователь аутентифицирован:', data.user);
+                user.setUser(data.user)
+                user.setIsAuth(true)
+            } else {
+                console.log('Данные пользователя некорректны:', data);
+                user.setUser({})
+                user.setIsAuth(false)
+            }
         }).catch((error) => {
             console.log('Пользователь не аутентифицирован:', error.message);
             user.setUser({})
