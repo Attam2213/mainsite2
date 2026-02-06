@@ -6,6 +6,10 @@ const path = require('path');
 class PortfolioController {
     async create(req, res, next) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return next(ApiError.forbidden('Доступ запрещен'));
+            }
+
             const {title, description, link} = req.body;
             
             // Валидация обязательных полей
@@ -59,6 +63,10 @@ class PortfolioController {
     
     async delete(req, res, next) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return next(ApiError.forbidden('Доступ запрещен'));
+            }
+
             const {id} = req.params;
             
             if (!id || isNaN(id)) {

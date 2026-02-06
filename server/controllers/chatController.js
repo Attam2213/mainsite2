@@ -50,6 +50,10 @@ class ChatController {
     // Получить все активные чаты для админа
     async getAllChats(req, res) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return res.status(403).json({ message: 'Доступ запрещен' });
+            }
+
             const chats = await Chat.findAll({
                 where: { status: 'active' },
                 include: [
@@ -119,7 +123,8 @@ class ChatController {
     // Отправить сообщение
     async sendMessage(req, res) {
         try {
-            const { chatId, content } = req.body;
+            const { chatId } = req.params;
+            const { content } = req.body;
             const userId = req.user.id;
             const files = req.files;
 
@@ -193,6 +198,10 @@ class ChatController {
     // Закрыть чат (только для админа)
     async closeChat(req, res) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return res.status(403).json({ message: 'Доступ запрещен' });
+            }
+
             const { chatId } = req.params;
 
             const chat = await Chat.findByPk(chatId);
@@ -213,6 +222,10 @@ class ChatController {
     // Получить количество непрочитанных сообщений для админа
     async getUnreadCount(req, res) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return res.status(403).json({ message: 'Доступ запрещен' });
+            }
+
             const count = await Message.count({
                 where: {
                     sender_type: 'user',

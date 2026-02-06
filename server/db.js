@@ -25,10 +25,10 @@ if (process.env.DB_NAME && process.env.DB_USER && process.env.DB_PASSWORD && pro
     );
 } else {
     // Заглушка для локального тестирования без базы данных
-    console.log('⚠️  PostgreSQL не настроен, используем заглушку для тестирования');
+    console.log('⚠️  PostgreSQL не настроен, используем локальную SQLite базу данных');
     sequelize = new Sequelize({
         dialect: 'sqlite',
-        storage: ':memory:',
+        storage: 'database.sqlite',
         logging: false
     });
 }

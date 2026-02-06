@@ -4,6 +4,10 @@ const ApiError = require('../error/ApiError');
 class ServiceController {
     async createService(req, res, next) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return next(ApiError.forbidden('Доступ запрещен'));
+            }
+
             const { name, price, description, type } = req.body;
 
             if (!name || !price) {
@@ -28,8 +32,15 @@ class ServiceController {
 
     async getAllServices(req, res, next) {
         try {
+            let where = { is_active: true };
+            
+            // Администратор видит все услуги
+            if (req.user && req.user.role === 'ADMIN') {
+                where = {};
+            }
+
             const services = await Service.findAll({
-                where: { is_active: true },
+                where,
                 order: [['name', 'ASC']]
             });
 
@@ -43,6 +54,10 @@ class ServiceController {
 
     async updateService(req, res, next) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return next(ApiError.forbidden('Доступ запрещен'));
+            }
+
             const { id } = req.params;
             const { name, price, description, type, is_active } = req.body;
 
@@ -69,6 +84,10 @@ class ServiceController {
 
     async deleteService(req, res, next) {
         try {
+            if (req.user.role !== 'ADMIN') {
+                return next(ApiError.forbidden('Доступ запрещен'));
+            }
+
             const { id } = req.params;
 
             const service = await Service.findOne({ where: { id } });
