@@ -14,6 +14,7 @@ const Auth = observer(() => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -38,6 +39,12 @@ const Auth = observer(() => {
 
         if (password.length < 6) {
             setError('Пароль должен быть не менее 6 символов');
+            return false;
+        }
+
+        // Проверка совпадения паролей при регистрации
+        if (!isLogin && password !== confirmPassword) {
+            setError('Пароли не совпадают');
             return false;
         }
 
@@ -98,7 +105,7 @@ const Auth = observer(() => {
                         />
                     </Form.Group>
                     
-                    <Form.Group className="mb-4">
+                    <Form.Group className="mb-3">
                         <Form.Label>Пароль</Form.Label>
                         <Form.Control
                             type="password"
@@ -109,10 +116,27 @@ const Auth = observer(() => {
                         />
                     </Form.Group>
                     
+                    {!isLogin && (
+                        <Form.Group className="mb-4">
+                            <Form.Label>Повторите пароль</Form.Label>
+                            <Form.Control
+                                type="password"
+                                placeholder="Повторите пароль"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                disabled={loading}
+                            />
+                        </Form.Group>
+                    )}
+                    
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <Button 
                             variant="outline-success" 
-                            onClick={() => setIsLogin(!isLogin)}
+                            onClick={() => {
+                                setIsLogin(!isLogin);
+                                setError('');
+                                setConfirmPassword('');
+                            }}
                             disabled={loading}
                         >
                             {isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}
