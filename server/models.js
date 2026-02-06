@@ -88,6 +88,7 @@ const Invoice = sequelize.define('invoice', {
     type: { type: DataTypes.ENUM('monthly', 'one-time'), defaultValue: 'one-time' },
     status: { type: DataTypes.ENUM('pending', 'paid', 'cancelled', 'overdue'), defaultValue: 'pending' },
     due_date: { type: DataTypes.DATE },
+    paid_at: { type: DataTypes.DATE },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 });
