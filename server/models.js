@@ -39,10 +39,21 @@ const Service = sequelize.define('service', {
 
 const Message = sequelize.define('message', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    chat_id: { type: DataTypes.INTEGER, allowNull: false },
     sender_id: { type: DataTypes.INTEGER, allowNull: false },
     receiver_id: { type: DataTypes.INTEGER, allowNull: false },
     content: { type: DataTypes.TEXT, allowNull: false },
     is_read: { type: DataTypes.BOOLEAN, defaultValue: false },
+    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+});
+
+const ChatFile = sequelize.define('chat_file', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    filename: { type: DataTypes.STRING, allowNull: false },
+    original_name: { type: DataTypes.STRING, allowNull: false },
+    mimetype: { type: DataTypes.STRING, allowNull: false },
+    size: { type: DataTypes.INTEGER, allowNull: false },
+    path: { type: DataTypes.STRING, allowNull: false },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 });
 
@@ -79,6 +90,11 @@ Message.belongsTo(User, { foreignKey: 'receiver_id', as: 'receiver' });
 User.hasMany(Chat);
 Chat.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Chat.belongsTo(User, { foreignKey: 'admin_id', as: 'admin' });
+Chat.hasMany(Message, { foreignKey: 'chat_id' });
+Message.belongsTo(Chat, { foreignKey: 'chat_id' });
+
+Message.hasMany(ChatFile, { foreignKey: 'message_id', as: 'files' });
+ChatFile.belongsTo(Message, { foreignKey: 'message_id' });
 
 User.hasMany(Payment);
 Payment.belongsTo(User);
@@ -88,6 +104,7 @@ module.exports = {
     Portfolio,
     Service,
     Message,
+    ChatFile,
     Chat,
     Payment
 };

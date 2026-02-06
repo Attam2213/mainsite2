@@ -31,7 +31,7 @@ const start = async () => {
         await sequelize.authenticate();
         console.log('✅ PostgreSQL подключен успешно.');
         
-        await sequelize.sync(); // alter: true if needed
+        await sequelize.sync({ alter: true }); // Sync models with database
         console.log('Модели синхронизированы с базой данных.');
         
         app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
