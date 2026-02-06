@@ -1,11 +1,36 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Временно используем SQLite для тестирования
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: 'database.sqlite',
-    logging: false
-});
+let sequelize;
+
+// Проверяем, заданы ли переменные окружения для PostgreSQL
+if (process.env.DB_NAME && process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_HOST) {
+    // PostgreSQL configuration for VDS
+    sequelize = new Sequelize(
+        process.env.DB_NAME,
+        process.env.DB_USER,
+        process.env.DB_PASSWORD,
+        {
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT || 5432,
+            dialect: 'postgres',
+            logging: false,
+            pool: {
+                max: 5,
+                min: 0,
+                acquire: 30000,
+                idle: 10000
+            }
+        }
+    );
+} else {
+    // SQLite fallback for local development
+    console.log('PostgreSQL не настроен, используем SQLite для тестирования');
+    sequelize = new Sequelize({
+        dialect: 'sqlite',
+        storage: 'database.sqlite',
+        logging: false
+    });
+}
 
 module.exports = sequelize;
