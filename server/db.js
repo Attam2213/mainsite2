@@ -24,11 +24,11 @@ if (process.env.DB_NAME && process.env.DB_USER && process.env.DB_PASSWORD && pro
         }
     );
 } else {
-    // SQLite fallback for local development
-    console.log('PostgreSQL не настроен, используем SQLite для тестирования');
+    // Заглушка для локального тестирования без базы данных
+    console.log('⚠️  PostgreSQL не настроен, используем заглушку для тестирования');
     sequelize = new Sequelize({
         dialect: 'sqlite',
-        storage: 'database.sqlite',
+        storage: ':memory:',
         logging: false
     });
 }

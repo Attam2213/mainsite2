@@ -29,14 +29,14 @@ app.use(errorHandler);
 const start = async () => {
     try {
         await sequelize.authenticate();
-        console.log('База данных подключена успешно.');
+        console.log('✅ PostgreSQL подключен успешно.');
         
         await sequelize.sync(); // alter: true if needed
         console.log('Модели синхронизированы с базой данных.');
         
         app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
     } catch (e) {
-        console.error('Ошибка при запуске сервера:', e);
+        console.error('Ошибка при подключении к PostgreSQL:', e);
         process.exit(1);
     }
 }

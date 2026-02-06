@@ -1,4 +1,11 @@
-const sequelize = require('./db');
+let sequelize;
+
+// Импортируем sequelize динамически
+if (typeof window === 'undefined') {
+    // В Node.js окружении
+    sequelize = require('./db');
+}
+
 const { DataTypes } = require('sequelize');
 
 const User = sequelize.define('user', {
@@ -30,63 +37,57 @@ const Service = sequelize.define('service', {
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 });
 
-const Invoice = sequelize.define('invoice', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    user_id: { type: DataTypes.INTEGER, allowNull: false },
-    service_id: { type: DataTypes.INTEGER, allowNull: false },
-    amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
-    status: { type: DataTypes.ENUM('pending', 'paid', 'cancelled'), defaultValue: 'pending' },
-    type: { type: DataTypes.ENUM('monthly', 'one-time'), defaultValue: 'one-time' },
-    description: { type: DataTypes.TEXT },
-    due_date: { type: DataTypes.DATE },
-    paid_at: { type: DataTypes.DATE },
-    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-    updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
-});
-
-const Chat = sequelize.define('chat', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    user_id: { type: DataTypes.INTEGER, allowNull: false },
-    status: { type: DataTypes.ENUM('active', 'closed'), defaultValue: 'active' },
-    subject: { type: DataTypes.STRING },
-    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-    updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
-});
-
 const Message = sequelize.define('message', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    chat_id: { type: DataTypes.INTEGER, allowNull: false },
     sender_id: { type: DataTypes.INTEGER, allowNull: false },
-    sender_type: { type: DataTypes.ENUM('user', 'admin'), defaultValue: 'user' },
+    receiver_id: { type: DataTypes.INTEGER, allowNull: false },
     content: { type: DataTypes.TEXT, allowNull: false },
     is_read: { type: DataTypes.BOOLEAN, defaultValue: false },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 });
 
-const ChatFile = sequelize.define('chat_file', {
+const Chat = sequelize.define('chat', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    message_id: { type: DataTypes.INTEGER, allowNull: false },
-    filename: { type: DataTypes.STRING, allowNull: false },
-    original_name: { type: DataTypes.STRING, allowNull: false },
-    file_type: { type: DataTypes.STRING },
-    file_size: { type: DataTypes.INTEGER },
-    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+    user_id: { type: DataTypes.INTEGER, allowNull: false },
+    admin_id: { type: DataTypes.INTEGER, allowNull: true },
+    is_active: { type: DataTypes.BOOLEAN, defaultValue: true },
+    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 });
 
-// Связи между моделями
-User.hasMany(Invoice, { foreignKey: 'user_id' });
-Invoice.belongsTo(User, { foreignKey: 'user_id' });
+const Payment = sequelize.define('payment', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    user_id: { type: DataTypes.INTEGER, allowNull: false },
+    amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+    currency: { type: DataTypes.STRING, defaultValue: 'RUB' },
+    status: { type: DataTypes.ENUM('pending', 'completed', 'failed', 'cancelled'), defaultValue: 'pending' },
+    payment_method: { type: DataTypes.STRING, allowNull: false }, // 'yoomoney', 'sberbank', etc.
+    payment_id: { type: DataTypes.STRING }, // ID от платежной системы
+    description: { type: DataTypes.TEXT },
+    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+});
 
-Service.hasMany(Invoice, { foreignKey: 'service_id' });
-Invoice.belongsTo(Service, { foreignKey: 'service_id' });
+// Связи
+User.hasMany(Portfolio);
+Portfolio.belongsTo(User);
 
-User.hasMany(Chat, { foreignKey: 'user_id' });
-Chat.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Message);
+Message.belongsTo(User, { foreignKey: 'sender_id', as: 'sender' });
+Message.belongsTo(User, { foreignKey: 'receiver_id', as: 'receiver' });
 
-Chat.hasMany(Message, { foreignKey: 'chat_id' });
-Message.belongsTo(Chat, { foreignKey: 'chat_id' });
+User.hasMany(Chat);
+Chat.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Chat.belongsTo(User, { foreignKey: 'admin_id', as: 'admin' });
 
-Message.hasMany(ChatFile, { foreignKey: 'message_id' });
-ChatFile.belongsTo(Message, { foreignKey: 'message_id' });
+User.hasMany(Payment);
+Payment.belongsTo(User);
 
-module.exports = { User, Portfolio, Service, Invoice, Chat, Message, ChatFile };
+module.exports = {
+    User,
+    Portfolio,
+    Service,
+    Message,
+    Chat,
+    Payment
+};
